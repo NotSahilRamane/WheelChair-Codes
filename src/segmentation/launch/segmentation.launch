@@ -1,0 +1,4 @@
+<launch>
+    <node name="segmentation" pkg="segmentation" type="main.py" output="screen">
+    </node>
+</launch>
