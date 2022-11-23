@@ -19,6 +19,7 @@ from PointCloudConversion import convertCloudFromRosToOpen3d, convertCloudFromOp
 
 class Integration():
     def __init__(self):
+
         self.POINTCLOUD_RECEIVED = 0
         self.IMAGE_RECEIVED = 0
         self.pointcloud = None
@@ -57,6 +58,7 @@ class Integration():
         self.CAMERA_MODEL.fromCameraInfo(msg)
 
     def run(self):
+        color = (0, 255, 0) # Green :)
         tme = time.time()
         if self.POINTCLOUD_RECEIVED == 1 and self.IMAGE_RECEIVED == 1:
             lidar_image = self.image
@@ -85,7 +87,7 @@ class Integration():
                         L = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                         if random.choice(L):
                             # print("Hello")
-                            cv2.circle(lidar_image, (j,i), 1, (0, 255, 0), -1)
+                            cv2.circle(lidar_image, (j,i), 1, color, -1)
 
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(lidar_image, "bgr8"))
             print("Image Published")
