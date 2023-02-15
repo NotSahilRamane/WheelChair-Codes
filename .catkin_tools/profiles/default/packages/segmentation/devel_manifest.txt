@@ -1,0 +1,5 @@
+segmentation
+/home/sahil/WheelChair-Codes/devel/.private/segmentation/cmake.lock /home/sahil/WheelChair-Codes/devel/./cmake.lock
+/home/sahil/WheelChair-Codes/devel/.private/segmentation/share/segmentation/cmake/segmentationConfig.cmake /home/sahil/WheelChair-Codes/devel/share/segmentation/cmake/segmentationConfig.cmake
+/home/sahil/WheelChair-Codes/devel/.private/segmentation/share/segmentation/cmake/segmentationConfig-version.cmake /home/sahil/WheelChair-Codes/devel/share/segmentation/cmake/segmentationConfig-version.cmake
+/home/sahil/WheelChair-Codes/devel/.private/segmentation/lib/pkgconfig/segmentation.pc /home/sahil/WheelChair-Codes/devel/lib/pkgconfig/segmentation.pc

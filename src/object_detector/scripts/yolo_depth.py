@@ -4,11 +4,19 @@ import this
 import cv2
 import rospy
 from deep_sort.yoloV5 import YOLO_Fast
-
+from ros_numpy import point_cloud2
 from cv_bridge import CvBridge, CvBridgeError
-from sensor_msgs.msg import Image, CompressedImage
+from sensor_msgs.msg import Image, CompressedImage, PointCloud2, CameraInfo
 # from sensor_msgs.msg import Twist
 from av_messages.msg import objects, object_
+import image_geometry
+import ros_numpy
+import copy
+import numpy as np 
+import cv2
+import time
+import open3d
+import random
 
 
 # import torch
@@ -24,18 +32,36 @@ class Detector:
         self.bridge = CvBridge()
         self.rgb_image = None
         self.depth_image = None
-
-        self.yolo = YOLO_Fast(sc_thresh=.5, nms_thresh=.45, cnf_thresh=.45, model='/home/sahil/Robin/src/object_detector/scripts/deep_sort/onnx_models/yolov5s.onnx')
+        self.POINTCLOUD_RECEIVED = 0
+        self.pointcloud = None
+        self.pointcloud_message = None
+        self.l_h = None
+        self.bridge = CvBridge()
+        self.FOCAL_LENGTH = 0.0028
+        self.u0 = 672/2
+        self.v0 = 376/2
+        self.yolo = YOLO_Fast(sc_thresh=.5, nms_thresh=.45, cnf_thresh=.45, model='/home/sahil/WheelChair-Codes/src/object_detector/scripts/deep_sort/onnx_models/yolov5s.onnx')
         rospy.loginfo("Loaded Model")
         self.RGB_IMAGE_RECEIVED = 0
+        self.CAMERA_MODEL = image_geometry.PinholeCameraModel()
         self.DEPTH_IMAGE_RECEIVED = 0
 
     def subscribeToTopics(self):
         rospy.loginfo("Subscribed to topics")
         rospy.Subscriber(self.image_topicname, CompressedImage,
                          self.storeImage, buff_size = 2**24, queue_size=1)
+        rospy.Subscriber("/camera/color/camera_info", CameraInfo, self.cameraInfoSave, queue_size=1)
+        
+        rospy.Subscriber("/velodyne_points", PointCloud2, self.syncData, queue_size=1, buff_size=2**28)
         rospy.Subscriber(self.depth_image_topicname, Image,
                         self.storeDepthImage, queue_size=1)
+        
+    def syncData(self, data):
+        self.POINTCLOUD_RECEIVED = 1
+        self.pointcloud = data
+
+    def cameraInfoSave(self, msg):
+        self.CAMERA_MODEL.fromCameraInfo(msg)
 
     def loadParameters(self):
         '''
@@ -91,7 +117,12 @@ class Detector:
         orig_dim = (H, W)
 
         return orig_dim, CX, FX
-    
+
+    def getHeight(self, lateral_depth, obj_height_px, sensor_height, img_height, focal_length=4.81):
+        # real height of the object (mm) = distance to object (mm) * obj height (px) * sensor height (mm) / (focal length (mm) * img height (px))
+        return (lateral_depth * obj_height_px * sensor_height) / (focal_length * img_height)  
+
+
     def callObjectDetector(self, image, depth_image): # Copy for Obj Detection remove for loops
         '''
         Call the segmentation model related functions here (Reuben, Mayur)
@@ -100,27 +131,62 @@ class Detector:
         # print("Tracker called")
         obj_message = objects()
         # print("Image",image)
-        x_and_ys, _, _, classes, nums = self.yolo.object_detection(image, visualise = True)
-        print(nums, "No. of dets")
+        heights, bottom_left, x_and_ys, _, _, classes, nums, image = self.yolo.object_detection(image, visualise = True)
+        # print(nums, "No. of dets")
   
         orig_dim, CX, FX = self.calculateParamsForDistance(depth_image)
-        self.callPublisher(self.yolo.image)
-        print("Image Published")
-        for x, y in x_and_ys:
+        # self.callPublisher(self.yolo.image)
+        # print("Image Published")
+        img_height = image.shape[0]
+        print(image.shape[0], "SHAPE")
+        for hgt, (b, l), (x, y) in zip(heights, bottom_left, x_and_ys):
             single_obj = object_()
-            # print("Inside forloop main")
-            # if self.loop_number == 0:
-            #     print("loop 0")
-            # print(y,x, "Y, X")
-            depth = depth_image[int(y)][int(x)] # instead of x, y, give pixel coordinates of Bounding boxes
-            lateral = (x - CX) * depth / FX
-            print(lateral, depth, id, "Veh coordinates")
-            # if lateral > -1.5 and lateral < 1.5:
-            # self.last_obj_pos_depth = depth
-            # self.last_obj_pos_lateral = lateral
-            # print(self.id_to_track, "ID TO TRACK")
 
-            # print(lateral, depth)
+            depth = depth_image[int(y)][int(x)] # instead of x, y, give pixel coordinates of Bounding boxes
+            lidar_image = image
+            pc2img = depth_image
+            ld_img = pc2img
+            print("Depth, ", depth)
+            lateral = (x - CX) * depth / FX
+            # print(lateral, depth, id, "Veh coordinates")
+            # print("x: ", x, "y: ", y)
+            # print("b: ", b, "r: ", l)
+            object_height = self.getHeight(depth, hgt, 3, img_height, focal_length=4.81)
+            str_object_height = '%.2f' % (object_height)
+            # print("YOLO_depth: ", image.shape)
+            cv2.putText(image, str_object_height, (int(l), int(b)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255,255), thickness=2)
+            
+            
+            color = (0, 255, 0) # Green :)
+
+            if self.POINTCLOUD_RECEIVED == 1:
+                points3D = ros_numpy.point_cloud2.pointcloud2_to_array(self.pointcloud)
+                points3D = np.asarray(points3D.tolist())
+                inrange = np.where((points3D[:, 2] > 0))
+                points3D = points3D[inrange[0]]
+                points2D = [ self.CAMERA_MODEL.project3dToPixel(point) for point in points3D[:, :3] ]
+                points2D = np.asarray(points2D)
+                for i in range(len(pc2img)):
+                    for j in range(len(pc2img[i])):
+                        if len(points2D) == len(points3D) and pc2img[i, j] <= 9000 and pc2img[i, j] >= 300:
+                            L = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            if random.choice(L):
+                                # print("Hello")
+                                continue
+                        else:
+                            continue
+                lat = ld_img[int(y)][int(x)] * hgt
+
+                lon = 2*615
+                lidar_height = lat/lon
+                str_lidar_height = '%.2f' % (lidar_height)
+            cv2.putText(image, str_lidar_height, (int(l), int(b)+15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255,255), thickness=2)
+
+                
+
+                
+            # first para is the horizontal pos, second is the vertical pos.
+
             single_obj.position.x = x
             single_obj.position.y = y
             single_obj.id.data = 0
@@ -130,10 +196,10 @@ class Detector:
             single_obj.object_state_dt.theta = 0
             single_obj.position.z = depth
             obj_message.object_detections.append(single_obj)
-            # self.loop_number = 1
+
+        self.callPublisher(image)
         self.CoordsPublisher.publish(obj_message)
-            # print("published loop 0")
-            # self.last_time = time.time()
+        
 
 
     def callPublisher(self, image):

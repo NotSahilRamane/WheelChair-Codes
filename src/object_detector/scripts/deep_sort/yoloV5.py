@@ -20,13 +20,13 @@ class YOLO_Fast(): # outputs tlbr bounding boxes
     
     # Constructor
     # We create  a constructor that takes in score, confidence and nms thresholds, along with which model to use. 
-    def __init__(self, sc_thresh=.5, nms_thresh=.45, cnf_thresh=.45, model="./home/sahil/Robin/src/object_detector/scripts/deep_sort/yolov5s.onnx"):
+    def __init__(self, sc_thresh=.5, nms_thresh=.45, cnf_thresh=.45, model="/home/sahil/WheelChair-Codes/src/object_detector/scripts/deep_sort/onnx_models/yolov5s.onnx"):
         # Our model (YOLOv5) architecture expects a 640px by 640px image as input
         self.INPUT_WIDTH = 640
         self.INPUT_HEIGHT = 640
 
         # holding x and ys
-        self.xandys = []
+        # self.xandys = []
         
         # These are the thresholds that are used to perform the object detection
         self.SCORE_THRESHOLD = sc_thresh
@@ -44,7 +44,7 @@ class YOLO_Fast(): # outputs tlbr bounding boxes
         self.YELLOW = (0, 255, 255)
         
         # Network & Classes
-        classesFile = "/home/sahil/Robin/src/object_detector/scripts/data/labels/coco.names"
+        classesFile = "/home/sahil/WheelChair-Codes/src/object_detector/scripts/data/labels/coco.names"
         self.classes = None
         # A handy way to read all the classes from a file, without needed to hardcode each one
         with open(classesFile, 'rt') as f:
@@ -210,6 +210,10 @@ class YOLO_Fast(): # outputs tlbr bounding boxes
         self.picks = pick 
     
     def drawNMSBoxes(self):
+        # holding heights
+        self.heights = []
+        self.bottom_left = [] ###
+        self.xandys = []
         self.boxes = self.tlwh2tlbr()
         for box, pick, classId in zip(self.boxes, self.picks, self.class_ids):
             label = '%.2f' % (self.confidences[pick])
@@ -222,8 +226,12 @@ class YOLO_Fast(): # outputs tlbr bounding boxes
             right = box[2]
             bottom = box[3]
             cv2.rectangle(self.image, (left, top), (right, bottom), self.BLUE, 3*self.THICKNESS)
+            # print("YOLOV5: ", self.image.shape)
             x_y = ((bottom - top)/2, (right - left)/2)
+            print(x_y)
+            self.heights.append(bottom-top)
             self.xandys.append(x_y)
+            self.bottom_left.append((bottom, left)) ###
 
             #Display the label at the top of the bounding box
             labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
@@ -235,11 +243,11 @@ class YOLO_Fast(): # outputs tlbr bounding boxes
             label = 'Inference time: %.2f ms' % (t * 1000.0 / cv2.getTickFrequency())
             cv2.putText(self.image, label, (20, 40), self.FONT_FACE, self.FONT_SCALE, self.YELLOW, 1, cv2.LINE_AA)    
         
-    def object_detection(self, input_image, visualise=False):
+    def object_detection(self, input_image, visualise=True):
         self.pre_process(input_image)
         self.post_process()      
         self.non_max_suppression_fast()
         if visualise == True:
             self.drawNMSBoxes()
 
-        return self.xandys, self.boxes, np.array([self.classes_scores]), np.array([self.class_ids]), len(self.class_ids)
+        return self.heights, self.bottom_left, self.xandys, self.boxes, np.array([self.classes_scores]), np.array([self.class_ids]), len(self.class_ids), self.image
