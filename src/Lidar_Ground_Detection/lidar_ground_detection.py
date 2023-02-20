@@ -47,7 +47,7 @@ def plot_callback(data):
 
     # print(f"Points after downsampling: {len(downpcd.points)}")# DOWNSAMPLING
     # open3d.visualization.draw_geometries([downpcd])
-    _, inliers = pcd.segment_plane(distance_threshold=0.01,ransac_n=3,num_iterations=150)
+    _, inliers = pcd.segment_plane(distance_threshold=0.005,ransac_n=3,num_iterations=1000)
     inlier_cloud=pcd.select_by_index(inliers)
     # outlier_cloud=pcd.select_by_index(inliers,invert=True)
     # inlier_cloud.paint_uniform_color([1,0,0])

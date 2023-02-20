@@ -1,64 +1,64 @@
-[35m[1mScanning dependencies of target _av_messages_generate_messages_check_deps_objects[0m
-[35m[1mScanning dependencies of target std_msgs_generate_messages_lisp[0m
-[35m[1mScanning dependencies of target geometry_msgs_generate_messages_lisp[0m
-[35m[1mScanning dependencies of target sensor_msgs_generate_messages_lisp[0m
-[35m[1mScanning dependencies of target nav_msgs_generate_messages_lisp[0m
-[35m[1mScanning dependencies of target sensor_msgs_generate_messages_eus[0m
-[35m[1mScanning dependencies of target geometry_msgs_generate_messages_eus[0m
 [35m[1mScanning dependencies of target _av_messages_generate_messages_check_deps_object_[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target _av_messages_generate_messages_check_deps_objects[0m
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_lisp[0m
 [  0%] Built target std_msgs_generate_messages_lisp
-[  0%] Built target geometry_msgs_generate_messages_lisp
-[  0%] Built target nav_msgs_generate_messages_lisp
-[  0%] Built target sensor_msgs_generate_messages_eus
 [  0%] Built target sensor_msgs_generate_messages_lisp
 [  0%] Built target geometry_msgs_generate_messages_eus
+[  0%] Built target nav_msgs_generate_messages_lisp
+[  0%] Built target sensor_msgs_generate_messages_eus
+[  0%] Built target geometry_msgs_generate_messages_lisp
 [35m[1mScanning dependencies of target std_msgs_generate_messages_eus[0m
-[35m[1mScanning dependencies of target nav_msgs_generate_messages_eus[0m
-[35m[1mScanning dependencies of target geometry_msgs_generate_messages_py[0m
 [35m[1mScanning dependencies of target sensor_msgs_generate_messages_py[0m
 [35m[1mScanning dependencies of target nav_msgs_generate_messages_py[0m
-[35m[1mScanning dependencies of target std_msgs_generate_messages_py[0m
-[  0%] Built target sensor_msgs_generate_messages_py
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_py[0m
 [  0%] Built target nav_msgs_generate_messages_eus
 [  0%] Built target geometry_msgs_generate_messages_py
 [  0%] Built target std_msgs_generate_messages_eus
+[  0%] Built target sensor_msgs_generate_messages_py
+[35m[1mScanning dependencies of target std_msgs_generate_messages_py[0m
 [  0%] Built target std_msgs_generate_messages_py
 [  0%] Built target nav_msgs_generate_messages_py
-[35m[1mScanning dependencies of target geometry_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_nodejs[0m
 [35m[1mScanning dependencies of target std_msgs_generate_messages_nodejs[0m
 [35m[1mScanning dependencies of target sensor_msgs_generate_messages_nodejs[0m
-[35m[1mScanning dependencies of target nav_msgs_generate_messages_nodejs[0m
-[35m[1mScanning dependencies of target geometry_msgs_generate_messages_cpp[0m
-[35m[1mScanning dependencies of target nav_msgs_generate_messages_cpp[0m
-[  0%] Built target geometry_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_nodejs[0m
 [  0%] Built target std_msgs_generate_messages_nodejs
 [  0%] Built target sensor_msgs_generate_messages_nodejs
-[  0%] Built target nav_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_cpp[0m
 [  0%] Built target _av_messages_generate_messages_check_deps_objects
+[  0%] Built target nav_msgs_generate_messages_nodejs
 [  0%] Built target _av_messages_generate_messages_check_deps_object_
-[  0%] Built target nav_msgs_generate_messages_cpp
-[35m[1mScanning dependencies of target std_msgs_generate_messages_cpp[0m
+[  0%] Built target geometry_msgs_generate_messages_nodejs
 [  0%] Built target geometry_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target std_msgs_generate_messages_cpp[0m
 [35m[1mScanning dependencies of target sensor_msgs_generate_messages_cpp[0m
-[35m[1mScanning dependencies of target av_messages_generate_messages_nodejs[0m
-[35m[1mScanning dependencies of target av_messages_generate_messages_py[0m
-[35m[1mScanning dependencies of target av_messages_generate_messages_lisp[0m
+[  0%] Built target nav_msgs_generate_messages_cpp
 [35m[1mScanning dependencies of target av_messages_generate_messages_eus[0m
-[  0%] Built target std_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target av_messages_generate_messages_lisp[0m
 [  0%] Built target sensor_msgs_generate_messages_cpp
-[ 41%] [34m[1mGenerating Python from MSG av_messages/object_[0m
-[ 41%] [34m[1mGenerating Javascript code from av_messages/object_.msg[0m
-[ 41%] [34m[1mGenerating Python from MSG av_messages/objects[0m
-[ 50%] [34m[1mGenerating Lisp code from av_messages/objects.msg[0m
-[ 41%] [34m[1mGenerating Lisp code from av_messages/object_.msg[0m
-[ 41%] [34m[1mGenerating Javascript code from av_messages/objects.msg[0m
-[ 58%] [34m[1mGenerating EusLisp code from av_messages/object_.msg[0m
+[  0%] Built target std_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target av_messages_generate_messages_nodejs[0m
+[ 16%] [34m[1mGenerating EusLisp manifest code for av_messages[0m
+[ 16%] [34m[1mGenerating EusLisp code from av_messages/objects.msg[0m
+[35m[1mScanning dependencies of target av_messages_generate_messages_py[0m
+[ 25%] [34m[1mGenerating EusLisp code from av_messages/object_.msg[0m
+[ 33%] [34m[1mGenerating Lisp code from av_messages/object_.msg[0m
+[ 41%] [34m[1mGenerating Lisp code from av_messages/objects.msg[0m
 [35m[1mScanning dependencies of target av_messages_generate_messages_cpp[0m
+[ 50%] [34m[1mGenerating Python from MSG av_messages/object_[0m
+[ 58%] [34m[1mGenerating Javascript code from av_messages/object_.msg[0m
 [ 66%] [34m[1mGenerating C++ code from av_messages/object_.msg[0m
-[ 75%] [34m[1mGenerating EusLisp code from av_messages/objects.msg[0m
+[ 75%] [34m[1mGenerating Javascript code from av_messages/objects.msg[0m
 [ 75%] Built target av_messages_generate_messages_lisp
-[ 83%] [34m[1mGenerating C++ code from av_messages/objects.msg[0m
-[ 91%] [34m[1mGenerating EusLisp manifest code for av_messages[0m
+[ 83%] [34m[1mGenerating Python from MSG av_messages/objects[0m
+[ 91%] [34m[1mGenerating C++ code from av_messages/objects.msg[0m
 [ 91%] Built target av_messages_generate_messages_nodejs
 [ 91%] Built target av_messages_generate_messages_cpp
 [100%] [34m[1mGenerating Python msg __init__.py for av_messages[0m

@@ -1,10 +1,10 @@
 
 "use strict";
 
-let object_ = require('./object_.js');
 let objects = require('./objects.js');
+let object_ = require('./object_.js');
 
 module.exports = {
-  object_: object_,
   objects: objects,
+  object_: object_,
 };

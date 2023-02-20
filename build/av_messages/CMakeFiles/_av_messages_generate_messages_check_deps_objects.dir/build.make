@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/sahil/WheelChair-Codes/build/av_messages
 include CMakeFiles/_av_messages_generate_messages_check_deps_objects.dir/progress.make
 
 CMakeFiles/_av_messages_generate_messages_check_deps_objects:
-	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py av_messages /home/sahil/WheelChair-Codes/src/av_messages/msg/objects.msg std_msgs/Int16:av_messages/object_:std_msgs/String:std_msgs/Header:geometry_msgs/Point:geometry_msgs/Pose2D
+	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py av_messages /home/sahil/WheelChair-Codes/src/av_messages/msg/objects.msg std_msgs/Int16:geometry_msgs/Point:av_messages/object_:geometry_msgs/Pose2D:std_msgs/Header:std_msgs/String
 
 _av_messages_generate_messages_check_deps_objects: CMakeFiles/_av_messages_generate_messages_check_deps_objects
 _av_messages_generate_messages_check_deps_objects: CMakeFiles/_av_messages_generate_messages_check_deps_objects.dir/build.make
