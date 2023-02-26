@@ -8,6 +8,8 @@
 
 # modified environment variables
 export CMAKE_PREFIX_PATH="/home/sahil/WheelChair-Codes/devel/.private/object_tracking:$CMAKE_PREFIX_PATH"
+export LD_LIBRARY_PATH="/home/sahil/WheelChair-Codes/devel/.private/object_tracking/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/home/sahil/WheelChair-Codes/devel/.private/object_tracking/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD='/home/sahil/WheelChair-Codes/build/object_tracking'
 export ROSLISP_PACKAGE_DIRECTORIES="/home/sahil/WheelChair-Codes/devel/.private/object_tracking/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
 export ROS_PACKAGE_PATH="/home/sahil/WheelChair-Codes/src/object_detector:$ROS_PACKAGE_PATH"

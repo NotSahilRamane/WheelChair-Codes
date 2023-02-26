@@ -227,8 +227,8 @@ class YOLO_Fast(): # outputs tlbr bounding boxes
             bottom = box[3]
             cv2.rectangle(self.image, (left, top), (right, bottom), self.BLUE, 3*self.THICKNESS)
             # print("YOLOV5: ", self.image.shape)
-            x_y = ((bottom - top)/2, (right - left)/2)
-            print(x_y)
+            x_y = (0.66*(top + (bottom - top)/2),0.66*(left +  (right - left)/2))
+            # print(x_y)
             self.heights.append(bottom-top)
             self.xandys.append(x_y)
             self.bottom_left.append((bottom, left)) ###

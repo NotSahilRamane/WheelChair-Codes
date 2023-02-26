@@ -17,7 +17,7 @@ import cv2
 import time
 import open3d
 import random
-
+import math
 from PointCloudConversion import convertCloudFromRosToOpen3d, convertCloudFromOpen3dToRos
 import ros_numpy
 
@@ -53,7 +53,7 @@ class Detector:
 
     def subscribeToTopics(self):
         rospy.loginfo("Subscribed to topics")
-        rospy.Subscriber(self.image_topicname, CompressedImage,
+        rospy.Subscriber(self.image_topicname, Image,
                          self.storeImage, buff_size = 2**24, queue_size=1)
         rospy.Subscriber("/camera/color/camera_info", CameraInfo, self.cameraInfoSave, queue_size=1)
         
@@ -64,7 +64,7 @@ class Detector:
     def syncData(self, data):
         if self.POINTCLOUD_RECEIVED == 0:
             self.pointcloud = data
-            print("POINTCLOUD SAVED")
+            # print("POINTCLOUD SAVED")
             self.POINTCLOUD_RECEIVED = 1
             self.sync_frames()
 
@@ -76,7 +76,7 @@ class Detector:
         do something
         '''
         rospy.loginfo("Params Loaded")
-        self.image_topicname = "/camera/color/image_raw/compressed"
+        self.image_topicname = "/camera/color/image_raw"
         self.depth_image_topicname = "/camera/depth/image_rect_raw"
         self.pub_topic_name = "/yolo_depth/detected_image"
     
@@ -87,7 +87,7 @@ class Detector:
         self.CoordsPublisher = rospy.Publisher("/perception/vision/coords", objects, queue_size=1)
 
     def plot_callback(self, data):
-        print("IN CALLBACK")
+        # print("IN CALLBACK")
         # self.pointcloud = data
         
         xy = []
@@ -95,15 +95,22 @@ class Detector:
         # pcd_arr = np.asarray(pcd.points)
         # print(pcd_arr[0])
         # arr_front = np.where(pcd_arr[:, 1] >= 0, 1, 0) # picked all points in front of the pointcloud
-
-        _, inliers = pcd.segment_plane(distance_threshold=0.009,ransac_n=3,num_iterations=1000)
+        points_arr = np.asarray(pcd.points)
+        print("POINTS", len(points_arr))
+        points_list = []
+        for point in points_arr:
+            if point[1] > -5 and point[1] < 5 and point[0] > 0:
+                points_list.append(point)
+        pcd_fil = o3d.geometry.PointCloud()
+        pcd_fil.points = np.asarray(points_list)
+        _, inliers = pcd_fil.segment_plane(distance_threshold=0.09,ransac_n=3,num_iterations=1000)
         
-        inlier_cloud=pcd.select_by_index(inliers, invert=True)
-        outlier_cloud=pcd.select_by_index(inliers)
+        inlier_cloud=pcd_fil.select_by_index(inliers, invert=True)
+        outlier_cloud=pcd_fil.select_by_index(inliers)
 
         inlier_cloud.paint_uniform_color([1,0,0])
         outlier_cloud.paint_uniform_color([0,0,1])
-        labels = np.array(inlier_cloud.cluster_dbscan(eps=0.119, min_points=7))
+        labels = np.array(inlier_cloud.cluster_dbscan(eps=0.05, min_points=3))
         max_label = labels.max()
         # print(max_label, "CLUSTERS")
         colors = plt.get_cmap("tab20")(labels / (max_label 
@@ -142,7 +149,7 @@ class Detector:
     def storeImage(self, img): # Copy for Obj Detection
         if self.RGB_IMAGE_RECEIVED == 0:
             try:
-                frame = self.bridge.compressed_imgmsg_to_cv2(img, 'bgr8')
+                frame = self.bridge.imgmsg_to_cv2(img, 'bgr8')
                 rospy.loginfo("RGB Image Stored")
             except CvBridgeError as e:
                 rospy.loginfo(str(e))
@@ -164,27 +171,34 @@ class Detector:
 
     def sync_frames(self): # Copy for Obj Detection
         if self.RGB_IMAGE_RECEIVED == 1 and self.DEPTH_IMAGE_RECEIVED == 1 and self.POINTCLOUD_RECEIVED == 1:
-            print("IN FRAMES")
-            self.callObjectDetector(self.rgb_image, self.depth_image, self.pointcloud)
-            self.DEPTH_IMAGE_RECEIVED = 0
-            self.RGB_IMAGE_RECEIVED = 0
-            self.POINTCLOUD_RECEIVED = 0
+            # print("IN FRAMES")
+            try:
+                self.callObjectDetector(self.rgb_image, self.depth_image, self.pointcloud)
+                self.DEPTH_IMAGE_RECEIVED = 0
+                self.RGB_IMAGE_RECEIVED = 0
+                self.POINTCLOUD_RECEIVED = 0
+            except:
+                print("NO DETECTIONS")
+                self.DEPTH_IMAGE_RECEIVED = 0
+                self.RGB_IMAGE_RECEIVED = 0
+                self.POINTCLOUD_RECEIVED = 0
+                
 
 
     def calculateParamsForDistance(self, img_cv): # Copy for Obj Detection
-        FOV = 87   # FOV of camera used
+        FOVH = 87   # FOV of camera used
+        # FOVV = 58
         H, W = img_cv.shape[:2]
-    
+
         # print(H, W, "H, W") 
         CX = W / 2  # center of x-axis
-        CY = H/2
-        FX = CX / (np.tan(FOV / 2))  # focal length of x-axis
-        FY = FX
+        FX = CX / (np.tan(FOVH / 2))  # focal length of x-axis
+        # FY = CY / (np.tan(FOVV / 2))
         orig_dim = (H, W)
 
-        return orig_dim, CX, CY, FX, FY
+        return orig_dim, CX, FX
 
-    def getHeight(self, lateral_depth, obj_height_px, sensor_height, img_height, focal_length=4.81):
+    def getHeight(self, lateral_depth, obj_height_px, sensor_height, img_height, focal_length=1.93):
         # real height of the object (mm) = distance to object (mm) * obj height (px) * sensor height (mm) / (focal length (mm) * img height (px))
         return (lateral_depth * obj_height_px * sensor_height) / (focal_length * img_height)  
 
@@ -195,16 +209,20 @@ class Detector:
         and the final publish function (To be done by sahil)
         '''
 
-        print("Tracker called")
+        # print("Tracker called")
         obj_message = objects()
         # print("Image",image)
+        # depth_image = cv2.resize(depth_image, (720, 1280))
         heights, bottom_left, x_and_ys, _, _, classes, nums, image = self.yolo.object_detection(image, visualise = True)
         # print(nums, "No. of dets")
         clusters = self.plot_callback(pointcloud)
-        orig_dim, CX, CY, FX, FY = self.calculateParamsForDistance(depth_image)
+        
+        orig_dim, CX, FX = self.calculateParamsForDistance(depth_image)
         # self.callPublisher(self.yolo.image)
         # print("Image Published")
         img_height = image.shape[0]
+
+        # print(image.shape, depth_image.shape, "IMAGE SHAPE")
         kes = clusters.keys()
         # for k in kes:
         #     pts = np.asarray(clusters[k])
@@ -218,39 +236,62 @@ class Detector:
         # print(image.shape[0], "SHAPE")
         for hgt, (b, l), (x, y) in zip(heights, bottom_left, x_and_ys):
             single_obj = object_()
-
-            camera_y = depth_image[int(y)][int(x)] # depth
-
-            camera_x = (x - CX) * camera_y / FX # lateral
+            
+            camera_y = depth_image[int(x)][int(y)] # depth
+            print(depth_image.shape, "DEPTH SHAPE")
+            camera_x = (y - CX) * camera_y / FX # lateral
 
             camera_y = camera_y/1000 # CONVERT VALUES TO METERS
-            camera_x = camera_x/1000
+
+            ratio = y/depth_image.shape[1]
+            # print("RATIO", y, depth_image.shape[1], ratio)
+            # print(depth_image.shape[1], "SHAPE !")
+            if ratio > 0.5:
+                camera_angle = 43.5*(ratio-0.5)
+            elif ratio < 0.5:
+                camera_angle = -1*43.5*(0.5-ratio)
+            else:
+                camera_angle = 0
+
+            # print(ratio, angle, "RATIO")
+            camera_x = -1*camera_x/1000
             lidar_z =None
             for k in kes:
                 pts = np.asarray(clusters[k])
                 height = max(pts[:, 2])
-                depth = max(pts[:, 1])
-                lateral = np.mean(pts[:, 0])
-                percent = 0.8
-                if height>=0 and depth>0.85*camera_y and depth<1.15*camera_y and lateral>0.85*camera_x and lateral<1.15*camera_x:
-                    lidar_y = depth
-                    lidar_x = lateral
-                    lidar_z = height
-                    print("Height", lidar_z)
-                    print("Lateral", lidar_x, camera_x)
-                    print("Depth", lidar_y, camera_y)
-            if lidar_z != None:
-                cv2.putText(image, str(lidar_z), (int(l), int(b)+20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255,255), thickness=2)
-            object_height = self.getHeight(camera_y, hgt, 3, img_height, focal_length=4.81)
+                depth = max(pts[:, 0])
+                lateral = np.mean(pts[:, 1])
+                angle = (math.atan(depth/lateral)) * 180 / 3.14
+                if height>=0:
+                    # print("Angle ISSU")
+                    if angle>0.80*camera_angle and angle<1.20*camera_angle:
+                        # print("DEPTH ISSUE")
+                        # print("INSIDE ANGLE")
+                        print(depth, camera_y, "DEPPTH")
+                        if depth>0.80*camera_y and depth<1.20*camera_y:
+                            lidar_y = depth
+                            lidar_x = lateral
+                            lidar_z = height
+                            lidar_angle = angle
+                            print("TRUE")
+                            # print(angle, camera_angle, "ANGLE")
+
+                            # print("angle", lidar_angle, camera_angle)
+                            # print("Depth", lidar_y, camera_y)
+            if lidar_z:
+
+                cv2.putText(image, str(lidar_z), (int(l), int(b)-30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0,255), thickness=2)
+
+            # if lidar_z != None:
+            #     cv2.putText(image, str(lidar_y), (int(l), int(b)+20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0,0), thickness=2)
+            object_height = self.getHeight(camera_y, hgt, 3, img_height, focal_length=1.93)
             str_object_height = '%.2f' % (object_height)
             # print("YOLO_depth: ", image.shape)
-            cv2.putText(image, str_object_height, (int(l), int(b)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255,255), thickness=2)
-
-
+            cv2.putText(image, str(round(camera_y, 2)) + " " + str(round(camera_angle, 2)), (int(l), int(b)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255,255), thickness=2)
+            # cv2.putText(image, str(lidar_y) + " " + str(lidar_angle), (int(l), int(b)+30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0,0), thickness=2)
 
 
             # first para is the horizontal pos, second is the vertical pos.
-
             single_obj.position.x = x
             single_obj.position.y = y
             single_obj.id.data = 0
