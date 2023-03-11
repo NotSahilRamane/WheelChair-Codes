@@ -1,1 +1,0 @@
-/home/sahil/WheelChair-Codes/devel/.private/av_messages/share/gennodejs/ros/av_messages/msg/objects.js

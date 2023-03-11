@@ -1,8 +1,0 @@
-prefix=/home/sahil/WheelChair-Codes/devel/.private/segmentation
-
-Name: segmentation
-Description: Description of segmentation
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: std_msgs geometry_msgs nav_msgs sensor_msgs av_messages

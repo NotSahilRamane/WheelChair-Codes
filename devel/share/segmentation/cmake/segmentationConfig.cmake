@@ -1,1 +1,0 @@
-/home/sahil/WheelChair-Codes/devel/.private/segmentation/share/segmentation/cmake/segmentationConfig.cmake
