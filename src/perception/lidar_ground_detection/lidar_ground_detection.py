@@ -47,13 +47,18 @@ def plot_callback(data):
 
     # print(f"Points after downsampling: {len(downpcd.points)}")# DOWNSAMPLING
     # open3d.visualization.draw_geometries([downpcd])
-    _, inliers = pcd.segment_plane(distance_threshold=0.005,ransac_n=3,num_iterations=1000)
+    _, inliers = pcd.segment_plane(distance_threshold=0.009,ransac_n=3,num_iterations=1000)
     inlier_cloud=pcd.select_by_index(inliers)
     # outlier_cloud=pcd.select_by_index(inliers,invert=True)
     # inlier_cloud.paint_uniform_color([1,0,0])
     # outlier_cloud.paint_uniform_color([0,0,1])
     # open3d.visualization.draw_geometries([inlier_cloud])
     xyz = np.asarray([inlier_cloud.points])
+    # xyz_norm = xyz[:]
+    xyz[0,:,2] = 0
+
+    # print(xyz[0])
+    # print("HOLA")
     pointcloud_message = convertCloudFromOpen3dToRos(inlier_cloud, frame_id="velodyne")
     for field in xyz:
         for point in field:
@@ -72,7 +77,7 @@ def main():
 
     while not rospy.is_shutdown():
         rospy.Subscriber('/velodyne_points', PointCloud2,
-                         callback=plot_callback) 
+                         callback=plot_callback, queue_size=1) 
         # ani = FuncAnimation(fig, update_plot, init_func=plot_init)
         plt.show()
         rospy.spin()
