@@ -3,11 +3,16 @@ from nav_msgs.msg import Odometry
 from marvelmind_nav.msg import hedge_pos_ang
 import math
 import tf_conversions
+# from tf2_geometry_msgs.msg import 
+import tf
 import geometry_msgs
+import time
 
 class GPS2Odom:
     def __init__(self):
         self.loadTopics()
+        self.br = tf.TransformBroadcaster()
+
 
     def loadTopics(self):
         print("Topics loaded")
@@ -29,16 +34,18 @@ class GPS2Odom:
         Odom_msg = Odometry()
         print(msg.timestamp_ms)
         # Odom_msg.header.stamp
-        Odom_msg.header.frame_id = "odom"
-        Odom_msg.pose.pose.position.x = msg.x_m
-        Odom_msg.pose.pose.position.y = msg.y_m
-        Odom_msg.pose.pose.position.z = msg.z_m
-        angle = self.normalize_angle(msg.angle)
-        # Odom_msg.pose.pose.orientation.x = msg.angle
-        # quaternion = tf.transformations.quaternion_from_euler(0, 0, angle)
-        Odom_msg.pose.pose.orientation = geometry_msgs.msg.Quaternion(*tf_conversions.transformations.quaternion_from_euler(0, 0, angle))
+        self.br.sendTransform((msg.x_m, msg.y_m, msg.z_m),tf.transformations.quaternion_from_euler(0, 0, self.normalize_angle(msg.angle)),rospy.Time.now(),"velodyne","odom")
 
-        self.callPublisher(Odom_msg)
+        # Odom_msg.header.frame_id = "odom"
+        # Odom_msg.pose.pose.position.x = msg.x_m
+        # Odom_msg.pose.pose.position.y = msg.y_m
+        # Odom_msg.pose.pose.position.z = msg.z_m
+        # angle = self.normalize_angle(msg.angle)
+        # # Odom_msg.pose.pose.orientation.x = msg.angle
+        # # quaternion = tf.transformations.quaternion_from_euler(0, 0, angle)
+        # Odom_msg.pose.pose.orientation = geometry_msgs.msg.Quaternion(*tf_conversions.transformations.quaternion_from_euler(0, 0, angle))
+
+        # self.callPublisher(Odom_msg)
         print("Published")
 
 
