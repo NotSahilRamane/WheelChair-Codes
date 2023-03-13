@@ -7,7 +7,7 @@
     <param name="max_height" value="1.5"/>
 
     <!-- Min and max range range of generated laser scan - set this to match your depth sensor -->
-    <param name="range_min" value="0.2"/>
+    <param name="range_min" value="0.0"/>
     <param name="range_max" value="40"/>
 
     <!-- Frame of your depth sensor -->

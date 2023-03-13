@@ -28,6 +28,8 @@ class GPS2Odom:
     def format_msg_cb(self, msg):
         Odom_msg = Odometry()
         print(msg.timestamp_ms)
+        # Odom_msg.header.stamp
+        Odom_msg.header.frame_id = "odom"
         Odom_msg.pose.pose.position.x = msg.x_m
         Odom_msg.pose.pose.position.y = msg.y_m
         Odom_msg.pose.pose.position.z = msg.z_m
