@@ -1,0 +1,7 @@
+digraph G {
+"odom" -> "velodyne"[label=" Broadcaster: /gps_to_odom\nAverage rate: 3.107\nBuffer length: 4.506\nMost recent transform: 1679302559.988\nOldest transform: 1679302555.482\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1679302560.305662"[ shape=plaintext ] ;
+}->"odom";
+}
