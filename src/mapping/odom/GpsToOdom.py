@@ -34,16 +34,22 @@ class GPS2Odom:
         Odom_msg = Odometry()
         print(msg.timestamp_ms)
         # Odom_msg.header.stamp
-        self.br.sendTransform((msg.x_m, msg.y_m, msg.z_m),tf.transformations.quaternion_from_euler(0, 0, self.normalize_angle(msg.angle)),rospy.Time.now(),"base_link","map")
+        # self.br.sendTransform((msg.x_m, msg.y_m, msg.z_m),tf.transformations.quaternion_from_euler(0, 0, self.normalize_angle(msg.angle)),rospy.Time.now(),"base_link","map")
+        self.br.sendTransform((2.732, 0.069, 0),tf.transformations.quaternion_from_euler(0, 0, self.normalize_angle(0)),rospy.Time.now(),"base_link","map")
 
         Odom_msg.header.frame_id = "map"
-        Odom_msg.pose.pose.position.x = msg.x_m
-        Odom_msg.pose.pose.position.y = msg.y_m
-        Odom_msg.pose.pose.position.z = msg.z_m
-        angle = self.normalize_angle(msg.angle)
-        # Odom_msg.pose.pose.orientation.x = msg.angle
-        # quaternion = tf.transformations.quaternion_from_euler(0, 0, angle)
+        # Odom_msg.pose.pose.position.x = msg.x_m
+        # Odom_msg.pose.pose.position.y = msg.y_m
+        # Odom_msg.pose.pose.position.z = msg.z_m
+        # angle = self.normalize_angle(msg.angle)
+        # Odom_msg.pose.pose.orientation = geometry_msgs.msg.Quaternion(*tf_conversions.transformations.quaternion_from_euler(0, 0, angle))
+        
+        Odom_msg.pose.pose.position.x = 2.732
+        Odom_msg.pose.pose.position.y = 0.069
+        Odom_msg.pose.pose.position.z = 0
+        angle = self.normalize_angle(0)
         Odom_msg.pose.pose.orientation = geometry_msgs.msg.Quaternion(*tf_conversions.transformations.quaternion_from_euler(0, 0, angle))
+        
         print(Odom_msg)
         self.callPublisher(Odom_msg)
         print("Published")
