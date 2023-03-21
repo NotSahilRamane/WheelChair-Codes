@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-from yolo_depth import Detector
+from yolo_depth_camera import Detector
 
 
 def main():
