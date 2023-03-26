@@ -18,7 +18,7 @@ import time
 import open3d
 import random
 
-
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import tf_conversions
 import tf
 import geometry_msgs
@@ -90,6 +90,16 @@ class Detector:
             self.rgb_image = frame
             self.RGB_IMAGE_RECEIVED = 1
             self.sync_frames()
+            
+    def local_to_global(self, local_xyz, global_xyz, yaw):
+        yaw_rad = yaw
+        # Define rotation matrix
+        rot_matrix = np.array([[np.cos(yaw_rad), -np.sin(yaw_rad), 0],
+                               [np.sin(yaw_rad), np.cos(yaw_rad), 0],
+                               [0, 0, 1]])
+        # Convert local coordinates to global coordinates
+        global_xyz = np.dot(rot_matrix, local_xyz) + global_xyz
+        return global_xyz
 
     def storeDepthImage(self, img): # Copy for Obj Detection
         # frame=None
@@ -175,8 +185,12 @@ class Detector:
             str_object_height = '%.2f' % (object_height)
             # print("YOLO_depth: ", image.shape)
             cv2.putText(image, str_object_height, (int(l), int(b)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255,255), thickness=2)
-            marker.pose.position.x = pos.pose.pose.position.y + camera_y
-            marker.pose.position.y = pos.pose.pose.position.x + camera_x
+            orientation_q = pos.pose.pose.orientation
+            orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+            (roll, pitch, yaw) = euler_from_quaternion (orientation_list)
+            global_xyz = self.local_to_global(np.array([pos.pose.pose.position.y, pos.pose.pose.position.x, 0]), np.array([camera_x, camera_y, 0]), yaw)
+            marker.pose.position.x = global_xyz[0]
+            marker.pose.position.y = global_xyz[1]
             marker.pose.position.z = 0.0
             if ap == 1:
                 marker.action = marker.DELETEALL
